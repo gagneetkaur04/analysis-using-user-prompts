@@ -1,34 +1,58 @@
 import os
 import pandas as pd
 import streamlit as st
-from dotenv import load_dotenv
+import matplotlib.pyplot as plt
 import google.generativeai as genai
+from dotenv import load_dotenv
+from llama_index.core.query_engine import PandasQueryEngine
+from pandasai import SmartDataframe
+from pandasai.llm.google_palm import GooglePalm
+from langchain_google_genai import ChatGoogleGenerativeAI
 
-load_dotenv()
-API_KEY = os.environ['GOOGLE_API_KEY']
-genai.configure(api_key=API_KEY)
 
-model = genai.GenerativeModel('gemini-pro')
+# statistical analysis like mean, median, mode, std dev, etc.
+def analyze_data(df):
+    pass
 
-# -------------------------------- STREAMLIT --------------------------------------
-st.title("Prompt-driven analysis with PandasAI")
-uploaded_file = st.file_uploader("Upload a CSV file for analysis", type = ['csv'])
+# plots related to data
+def generate_plot(df, col_name, plot_type):
+    plt.show()
 
-if uploaded_file is not None:
-    df = pd.read_csv(uploaded_file)
-    st.write('------------------------------DATA--------------------------------')
-    st.write(df.head(3))
-    st.write('---------------------------STATISTICS------------------------------')
-    st.write('Mean')
-    st.write(df.mean())
-    st.write('Median')
-    st.write(df.median())
+# response generation of llm
+def generate_response(file_path, query, temperature=0.5):
+    df = pd.read_csv(file_path)
+    llm = ChatGoogleGenerativeAI(model="gemini-pro", temperature=temperature)
 
-    prompt = st.text_area("Enter your prompt: ")
+    pdi = SmartDataframe(df, config={"llm": llm})
+    
+    return pdi.chat(query)
 
-    if st.button('Generate'):
-        if prompt:
-            with st.spinner("Generating response..."):
-                st.write("--response--")
-        else:
-            st.warning("Please enter a prompt.")
+
+def main():
+
+    # Load Environment Variables
+    load_dotenv()
+    API_KEY = os.environ['GOOGLE_API_KEY']
+    genai.configure(api_key=API_KEY)
+
+    # App Title
+    st.title("Prompt-driven analysis with PandasAI")
+
+    # Storing the user uploaded csv
+    uploaded_file = st.file_uploader("Upload a CSV file for analysis", type = ['csv'])
+
+    # Performing Statistical Analysis on CSV and Prompt Generation
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
+
+        prompt = st.text_area("Enter your prompt: ")
+
+        if st.button('Generate'):
+            if prompt:
+                with st.spinner("Generating response..."):
+                    st.write("--response--")
+            else:
+                st.warning("Please enter a prompt.")
+
+if __name__ == "__main__":
+    main()
