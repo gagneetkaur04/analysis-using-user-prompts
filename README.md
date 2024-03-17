@@ -1,5 +1,7 @@
 # Query Your CSV
 
+Test the App : https://query-your-csv.streamlit.app/
+
 To operate the app, follow the steps on the command line:
 1. `python -m venv myenv`
 2. To activate the enviroment:
