@@ -39,9 +39,9 @@ def plot_exists(text: dict):
 
 def main():
 
-    load_dotenv()
-    API_KEY = os.environ['GOOGLE_API_KEY']
+    API_KEY = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=API_KEY)
+
 
     st.set_page_config(page_title="Chat with your CSV")
     st.header("Chat with your CSV")

@@ -1,4 +1,4 @@
 myenv
-notes.md
 .env
 tempDir
+.streamlit/*
