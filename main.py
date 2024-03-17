@@ -2,56 +2,17 @@ import os
 import pandas as pd
 import seaborn as sns
 import streamlit as st
+from dotenv import load_dotenv
 import matplotlib.pyplot as plt
 import google.generativeai as genai
-from dotenv import load_dotenv
-from langchain_experimental.agents import create_csv_agent
+import matplotlib.axes._axes as axes_module
 from langchain_google_genai import ChatGoogleGenerativeAI
-from plot_engine import plot_engine
-from llama_index.core.query_engine import PandasQueryEngine
-from llama_index.core.tools import QueryEngineTool, ToolMetadata
-from llama_index.core.agent import ReActAgent
-from prompt_template import new_prompt, instruction_str, context
+from langchain_experimental.agents import create_csv_agent
 
-def png_exists(directory='tempDir'):
-    for filename in os.listdir(directory):
-        if filename.endswith(".png"):
-            return True
-    return False
-
-def delete_png(directory='tempDir'):
-    for filename in os.listdir(directory):
-        if filename.endswith(".png"):
-            file_path = os.path.join(directory, filename)
-            os.remove(file_path)
-
-# Answer questions about the data in a comprehensive and informative way
-# def generate_response(df,query):
-#     gemini_llm = ChatGoogleGenerativeAI(model="gemini-pro",temperature=0)
-#     agent = create_csv_agent(gemini_llm, df, verbose=True)
-#     response = agent.run(query)
-
-#     return response
-            
-def generate_response(df, query, instruction_str=instruction_str, new_prompt=new_prompt):
-
-    llm = ChatGoogleGenerativeAI(model="gemini-pro",temperature=0)
-    csv_query_engine = PandasQueryEngine(df=df, llm=llm, verbose=True, instruction_str=instruction_str)
-    csv_query_engine.update_prompts({"pandas_prompt": new_prompt})
-
-    tools = [
-        plot_engine,
-        QueryEngineTool(
-            query_engine=csv_query_engine,
-            metadata=ToolMetadata(
-                name="data",
-                description="this gives information at the data present in CSV file",
-            ),
-        )
-    ]
-
-    agent = ReActAgent.from_tools(tools, llm=llm, verbose=True)         
-    response = agent.query(query)
+def generate_response(path,query):
+    gemini_llm = ChatGoogleGenerativeAI(model="gemini-pro",temperature=0)
+    agent = create_csv_agent(gemini_llm, path, verbose=True, return_intermediate_steps=True)
+    response = agent.invoke({"input": query})
 
     return response
 
@@ -62,6 +23,16 @@ def save_uploadedfile(uploadedfile):
     path = os.path.join("tempDir",uploadedfile.name)
 
     return path
+
+def plot_exists(text: dict):
+    if isinstance(text['output'], axes_module.Axes):
+        return text['output'].get_figure()
+    steps = text['intermediate_steps']
+    for step in steps:
+        if isinstance(step[1], axes_module.Axes):
+            fig = step[1]
+            return fig.get_figure()
+    return text['output']
 
 def main():
 
@@ -77,17 +48,15 @@ def main():
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
         path = save_uploadedfile(uploaded_file)
+        st.dataframe(df)
 
         prompt = st.text_area("Enter your prompt: ")
 
         if st.button('Generate'):
-            delete_png()
             if prompt:
-                if png_exists():
-                    st.image('tempDir/output.png')
-                else:
-                    with st.spinner("Generating response..."):
-                        st.write(generate_response(df, prompt))
+                with st.spinner("Generating response..."):
+                    result = generate_response(path, prompt)
+                    st.write(plot_exists(result))
             else:
                 st.warning("Please enter a prompt.")
 
