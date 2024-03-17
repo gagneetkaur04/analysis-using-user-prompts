@@ -39,7 +39,9 @@ def plot_exists(text: dict):
 
 def main():
 
-    API_KEY = st.secrets["GOOGLE_API_KEY"]
+    load_dotenv()
+    API_KEY = os.environ['GOOGLE_API_KEY']
+    # API_KEY = st.secrets["GOOGLE_API_KEY"]
     genai.configure(api_key=API_KEY)
 
 

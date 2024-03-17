@@ -1,5 +1,4 @@
 myenv
-.env
 tempDir
 .streamlit/*
 .devcontainer/*
