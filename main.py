@@ -17,6 +17,9 @@ def generate_response(path,query):
     return response
 
 def save_uploadedfile(uploadedfile):
+    if not os.path.exists('tempDir'):
+        os.makedirs('tempDir')
+
     with open(os.path.join("tempDir",uploadedfile.name),"wb") as f:
         f.write(uploadedfile.getbuffer())
     
