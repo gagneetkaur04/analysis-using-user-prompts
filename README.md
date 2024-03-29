@@ -22,8 +22,8 @@ The `generate_response` function is designed to process a natural language query
 - ### `save_uploadedfile()`
 The `save_uploadedfile` function is designed to save an uploaded file to a temporary directory on the server or local filesystem. This function is a utility for handling file uploads in a web application or script, saving uploaded files to a specified directory (`tempDir` in this case), and then returning the path to the saved file. It ensures that the directory exists before saving and handles the file in binary mode, making it suitable for any file type.
 
-### `plot_exists()`
+- ### `plot_exists()`
 The `plot_exists` function is carefully designed to search for a plot within a provided output or a series of processing steps, returning the plot's figure if found. If no plot is detected, it defaults to returning the original output, ensuring versatility and robustness in handling various types of responses.
 
-## `main()`
+- ### `main()`
 The `main` function orchestrates a Streamlit web application interface that interacts with CSV files using Google's generative AI. Users can upload CSV files, input prompts, and receive AI-generated responses.
